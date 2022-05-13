@@ -42,13 +42,23 @@ class SyntaxAnalyzer:
 
         print("Grammar\n")    
         self.show_grammar(self.__grammar)
-        for self.__lhs in self.__grammar:
-            if(self.__grammar_first[self.__lhs] == "null"):
-                self.__grammar_first = self.first_set(self.__lhs)
+        for lhs in self.__grammar:
+            if(self.__grammar_first[lhs] == "null"):
+                self.__grammar_first = self.first_set(lhs)
         print("\n\n\n")
 
         print("First Set\n")
         self.show_grammar(self.__grammar_first)
+
+        start = list(self.__grammar.keys())[0]
+        # print('start', start)
+        for lhs in self.__grammar:
+            if(self.__grammar_follow[lhs] == "null"):
+                self.__grammar_follow = self.follow_set(lhs, self.__grammar, self.__grammar_follow, start)
+        
+        print("\n\n\n")
+        print("Follow Set\n")
+        self.show_grammar(self.__grammar_follow)
 
     '''Build a function that helps in :
     1) grammar reading
@@ -97,10 +107,10 @@ class SyntaxAnalyzer:
                         self.__grammar_first = self.first_set(block[k])
                     for j in self.__grammar_first[block[k]]:
                         self.__grammar_first = self.grammar_util(self.__grammar_first, lhs, j)
-                        check.append(j)
+                        check.append(j) # to get distinct terminals
                 else: 
                     self.__grammar_first = self.grammar_util(self.__grammar_first, lhs, block[k])
-                    check.append(block[k])
+                    check.append(block[k]) # to get distinct terminals
                 if(block[k]=="`"):
                     flag = 1
                 current.extend(check)
@@ -114,4 +124,33 @@ class SyntaxAnalyzer:
                     self.__grammar_first[lhs].remove("`")
         return(self.__grammar_first)
 
-       
+    '''Follow util'''
+    def follow_util(self, k, next_i, grammar_follow, i, grammar, start, grammar_first, lhs):
+        if(len(k)==next_i): # if the Terminal was at the border
+            if(grammar_follow[i] == "null"):
+                grammar_follow = self.follow_set(i, grammar, grammar_follow, start)
+            for q in grammar_follow[i]:
+                grammar_follow = self.grammar_util(grammar_follow, lhs, q)
+        else:
+            if(k[next_i].isupper()):
+                for q in grammar_first[k[next_i]]:
+                    if(q=="`"):
+                        grammar_follow = self.follow_util(k, next_i+1, grammar_follow, i, grammar, start, grammar_first, lhs)		
+                    else:
+                        grammar_follow = self.grammar_util(grammar_follow, lhs, q)
+            else:
+                grammar_follow = self.grammar_util(grammar_follow, lhs, k[next_i])
+
+        return(grammar_follow)    
+
+    '''Followset''' 
+    def follow_set(self, lhs, grammar, grammar_follow, start):
+        for i in grammar:
+            j = grammar[i]
+            for k in j:
+                if(lhs in k):
+                    next_i = k.index(lhs)+1
+                    grammar_follow = self.follow_util(k, next_i, grammar_follow, i, grammar, start, self.__grammar_first, lhs)
+        if(lhs==start):
+            grammar_follow = self.grammar_util(grammar_follow, lhs, "$")
+        return(grammar_follow)  
