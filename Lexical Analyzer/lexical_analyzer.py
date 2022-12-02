@@ -1,22 +1,26 @@
 import re
 
-program  ='''int var1 = 05 + 10.512'''
+program  = '''int variable1 = 5 + 10.512 
+int variable2 = 10'''
 
 tokens = []
 lexemes = []
 
 operators = {'=' : 'Assignment op','+' : 'Addition op','-' : 'Subtraction op','/' : 'Division op','*' : 'Multiplication op','<' : 'Lessthan op','>' : 'Greaterthan op' }
 operators_key = operators.keys()
-
-data_type = {'int' : 'Datatype', 'double ' : 'Datatype', 'string ' : 'Datatype' }
+# print("operators_key: ", operators_key)
+data_type = {'int' : 'Datatype', 'double ' : 'Datatype', 'string ' : 'Datatype'}
 data_type_key = data_type.keys()
 
 punctuation_symbol = { ':' : 'colon', ';' : 'semi-colon', '.' : 'dot' , ',' : 'comma', '{}' : 'Statement delimiter','[]' : 'Array delimiter',',' : 'Argument list separator',':' : 'Statement label'}
 punctuation_symbol_key = punctuation_symbol.keys()
 print(program)
+
 lines = program.split("\n")
+print("lines: ", lines)
 for line in lines:
-    lexems = line.split(' ')
+    lexems = line.split()
+    print("lexems: ", lexems)
     for token in lexems:
         lexemes.append(token)
         if token in operators_key:
@@ -35,6 +39,6 @@ for line in lines:
             tokens.append("Error")
     print("=================================")
     print("Lexeme\t\tToken")
-    for i in range(0, len(lexemes)):
+    for i in range(len(lexemes)):
         print(lexemes[i],"\t\t", tokens[i]) 
     print("=================================")
